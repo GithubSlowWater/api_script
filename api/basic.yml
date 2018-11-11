@@ -1,0 +1,46 @@
+- api:
+    def: loginback($backlogin, $backpwd)
+    request:
+        url: /wsy_blockchain/admin/index.php
+        method: POST
+        data:
+            account: $backlogin
+            admin_login_code: '1'
+            password: $backpwd
+        params:
+            a: do_login
+            m: login
+    validate:
+        - eq: ["status_code", 200]
+        - eq: ["content.errmsg", 登录成功！]
+- api:
+    def: loginweb($user, $password)
+    request:
+        url: /wsy_blockchain/web/index.php
+        method: POST
+        params:
+            a: login
+            m: user
+        json:
+            account: '$user'
+            lang_id: '1'
+            password: $password
+            type: 1
+    validate:
+        - eq: ["status_code", 200]
+        - eq: ["content.errmsg", 登录成功]
+- api:
+    def: gettransferMsg($user)
+    request:
+        json:
+            business: 6
+            mobile: '$user'
+            mobile_area_code: '86'
+        method: POST
+        params:
+            a: sendCheckCode
+            m: function
+        url: /wsy_blockchain/web/index.php
+    validate:
+    -   eq: ["status_code", 200]
+    -   eq: ["headers.Content-Type", text/html; charset=utf-8;]

@@ -1,0 +1,40 @@
+-   config:
+        name: 查询权益卡
+        request:
+            base_url: 'http://git.weisanyun.cn'
+            headers:
+                User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+                    (KHTML, like Gecko) Chrome/69.0.3497.81 Safari/537.36
+        variables: []
+        parameters:
+            - backlogin-backpwd:
+                - ["admin", "admin"]
+-   test:
+        name: 后台登录
+        api: loginback($backlogin, $backpwd)
+-   test:
+        name: 查询权益卡
+        request:
+            data:
+                bind: ''
+                end: ''
+                name: ''
+                start: ''
+                valid: ''
+            headers:
+                Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+                X-Requested-With: XMLHttpRequest
+            method: POST
+            params:
+                a: right_list
+                m: equity
+            url: /wsy_blockchain/admin/index.php
+        # teardown_hooks:
+        # - ${hook_print(teardown)}
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 操作成功
