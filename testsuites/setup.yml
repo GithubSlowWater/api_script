@@ -1,0 +1,12 @@
+- config:
+    name: login_all
+    def: login_all($user, $password,$backlogin, $backpwd)
+    request:
+        "base_url": "$base_url"
+- test:
+    name: 前端登录
+    api: loginweb($user, $password)
+
+- test:
+    name: 后台登录
+    api: loginback($backlogin, $backpwd)

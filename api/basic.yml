@@ -3,6 +3,9 @@
     request:
         url: /wsy_blockchain/admin/index.php
         method: POST
+        headers:
+                Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+                X-Requested-With: XMLHttpRequest
         data:
             account: $backlogin
             admin_login_code: '1'
@@ -17,6 +20,8 @@
     def: loginweb($user, $password)
     request:
         url: /wsy_blockchain/web/index.php
+        headers:
+                Content-Type: application/json;charset=UTF-8
         method: POST
         params:
             a: login
@@ -30,17 +35,19 @@
         - eq: ["status_code", 200]
         - eq: ["content.errmsg", 登录成功]
 - api:
-    def: gettransferMsg($user)
+    def: sendCheckCode($user, $num)
     request:
-        json:
-            business: 6
-            mobile: '$user'
-            mobile_area_code: '86'
+        url: /wsy_blockchain/web/index.php
+        headers:
+                Content-Type: application/json;charset=UTF-8
         method: POST
         params:
             a: sendCheckCode
             m: function
-        url: /wsy_blockchain/web/index.php
+        json:
+            mobile: '$user'
+            mobile_area_code: '86'
+            business: $num
     validate:
-    -   eq: ["status_code", 200]
-    -   eq: ["headers.Content-Type", text/html; charset=utf-8;]
+        - eq: ["status_code", 200]
+        - eq: ["content.errmsg", 短信发送成功]

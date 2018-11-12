@@ -1,0 +1,96 @@
+-   config:
+        name: 用户转账  --$user
+        request:
+            base_url: '$base_url'
+            headers:
+                User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+                    (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36
+        variables: []
+        parameters:
+            - user-password-account:
+                - ["13800139001", "wsy888888", "13800139002"]
+            - backlogin-backpwd:
+                - ["admin", "wsy888888"]
+-   test:
+        name: 前端登录
+        api: loginweb($user, $password)
+-   test:
+        name: 后台登录
+        api: loginback($backlogin, $backpwd)
+-   test:
+        name: 获取转账地址
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                mobile: '$account'
+            method: POST
+            params:
+                a: getUserAccountbyPhone
+                m: personal
+            url: /wsy_blockchain/web/index.php
+        extract:
+            - account: content.data.account
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 获取成功
+-   test:
+        name: 转账申请信息  --关键密码转账
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                to_addr: '$account'
+                money: '10'
+                pay_way: 1
+                private_key:
+                help_word: 'aa888888'
+                mobile: '$user'
+                mobile_area_code: '86'
+                check: 1
+            method: POST
+            params:
+                a: originalTransfer
+                m: personal
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 验证成功
+-   test:
+        name: 获取转账验证码
+        api: sendCheckCode($user, 6)
+-   test:
+        name: 提交转账申请  --关键密码转账
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                to_addr: '$account'
+                money: '10'
+                pay_way: 1
+                private_key:
+                help_word: 'aa888888'
+                code: '777777'
+                mobile: '$user'
+                mobile_area_code: '86'
+                check: 2
+            method: POST
+            params:
+                a: originalTransfer
+                m: personal
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 转账申请已提交

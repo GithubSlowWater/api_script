@@ -1,0 +1,113 @@
+-   config:
+        name: 权益卡创建并使用  --$user
+        request:
+            base_url: '$base_url'
+            headers:
+                User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+                    (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36
+        variables: []
+        parameters:
+            - user-password:
+                - ["13800139002", "wsy888888"]
+                - ["13800139003", "wsy888888"]
+                - ["13800139004", "wsy888888"]
+            - backlogin-backpwd:
+                - ["admin", "admin"]
+-   test:
+        name: 前端登录
+        api: loginweb($user, $password)
+-   test:
+        name: 后台登录
+        api: loginback($backlogin, $backpwd)
+-   test:
+        name: 创建权益卡
+        request:
+            data:
+                card_value: '${random_int(8888,9999)}'
+                contract_num: '0000000${random_int(1000,9999)}'
+                deadline: 2018/11/30
+                rights_ret_radio: '1'
+                stakeholder_name: '权益卡${random_str(4)}'
+                type: '1'
+                user_papers_id: '000000${random_int(1000,9999)}'
+            headers:
+                Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+                X-Requested-With: XMLHttpRequest
+            method: POST
+            params:
+                a: card_save
+                m: equity
+            url: /wsy_blockchain/admin/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 操作成功
+-   test:
+        name: 查询权益卡
+        request:
+            data:
+                bind: ''
+                end: ''
+                name: ''
+                start: ''
+                valid: ''
+            headers:
+                Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+                X-Requested-With: XMLHttpRequest
+            method: POST
+            params:
+                a: right_list
+                m: equity
+            url: /wsy_blockchain/admin/index.php
+        extract:
+            - card_num: content.list_data.0.card_num
+            - card_pass: content.list_data.0.op_btn
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 操作成功
+-   test:
+        name: 用户使用权益卡
+        request:
+            headers:
+                Content-Type: application/json;charset=utf-8
+            json:
+                card_num: '$card_num'
+                card_pass: ${card_pass($card_pass)}
+            method: POST
+            params:
+                a: bindRightsCard
+                m: rights
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 绑定成功
+-   test:
+        name: 领取积分
+        request:
+            headers:
+                Content-Type: application/json;charset=utf-8
+            json:
+                card_num: '$card_num'
+            method: POST
+            params:
+                a: receiveIntegral
+                m: rights
+            url: http://git.weisanyun.cn/wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 领取成功

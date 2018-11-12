@@ -1,0 +1,214 @@
+-   config:
+        name: 转币申请  --$user
+        request:
+            base_url: '$base_url'
+            headers:
+                User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X)
+                    AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372
+                    Safari/604.1
+        variables: []
+        parameters:
+            - user-password:
+                - ["13800139002", "wsy888888"]
+                - ["13800139003", "wsy888888"]
+                - ["13800139004", "wsy888888"]
+            - backlogin-backpwd:
+                - ["admin", "wsy888888"]
+            - from_exch_num:
+                - ["100"]
+-   test:
+        name: web登录
+        api: loginweb($user, $password)
+-   test:
+        name: 获取所有币种
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                page: 1
+            method: POST
+            params:
+                a: getCoinType
+                m: coinExchange
+            url: /wsy_blockchain/web/index.php
+        extract:
+            - content_data: content
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 请求成功
+-   test:
+        name: 获取最小的币种
+        request:
+            headers:
+                Content-Type: application/json;charset=utf-8
+            json:
+                id: '${extract_change_rate($content_data)}'
+            method: POST
+            params:
+                a: getCoinDetail
+                m: coinExchange
+            url: /wsy_blockchain/web/index.php
+        extract:
+            - change_rate: content.data.change_rate
+            - id: content.data.id
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 请求成功
+-   test:
+        name: 申请转币
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                change_rate: '$change_rate'
+                coin_id: '$id'
+                expect_to_exch_num: ${mult_two($from_exch_num, $change_rate)}
+                from_exch_num: $from_exch_num
+            method: POST
+            params:
+                a: submitApply
+                m: coinExchange
+            url: /wsy_blockchain/web/index.php
+        extract:
+        - batchcode: content.batchcode
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 提交成功
+-   test:
+        name: 提交订单
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                batchcode: '$batchcode'
+            method: POST
+            params:
+                a: getCoinExcDetail
+                m: coinExchange
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 请求成功
+-   test:
+        name: 获取订单详情
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                batchcode: '$batchcode'
+            method: POST
+            params:
+                a: comfirmTransfer
+                m: coinExchange
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 操作成功
+-   test:
+        name: 订单详情
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                batchcode: '$batchcode'
+            method: POST
+            params:
+                a: getCoinExcDetail
+                m: coinExchange
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 请求成功
+-   test:
+        name: 提交订单成功
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                batchcode: '$batchcode'
+                pay_account: '123'
+                voucher: blockchain/user/856/5be3d6ee818d7.jpeg
+            method: POST
+            params:
+                a: submitVoucher
+                m: coinExchange
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 提交成功
+-   test:
+        name: 后台登录
+        api: loginback($backlogin, $backpwd)
+-   test:
+        name: 搜索订单号
+        request:
+            data:
+                batchcode: '$batchcode'
+                endTime: ''
+                from_coin_type_id: ''
+                nickmobile: ''
+                startTime: ''
+                status: ''
+            headers:
+                Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+                X-Requested-With: XMLHttpRequest
+            method: POST
+            params:
+                a: data_list
+                m: conversion_application
+            url: /wsy_blockchain/admin/index.php
+        extract:
+        - order_id: content.data_list.0.id
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - headers.Content-Type
+            - text/html; charset=utf-8
+-   test:
+        name: 转币审核拒绝
+        request:
+            data:
+                id: '$order_id'
+                ref_reason: '无法讲述的理由'
+            headers:
+                Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+                X-Requested-With: XMLHttpRequest
+            method: POST
+            params:
+                a: refuse_reason
+                m: conversion_application
+            url: /wsy_blockchain/admin/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200

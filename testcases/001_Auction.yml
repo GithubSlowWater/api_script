@@ -1,0 +1,129 @@
+-   config:
+        name: 商户竞拍  --$user
+        request:
+            base_url: '$base_url'
+            headers:
+                User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+                    (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36
+                Content-Type: application/json;charset=UTF-8
+        parameters:
+            - user-password:
+                - ["13800139002", "wsy888888"]
+                - ["13800139003", "wsy888888"]
+                - ["13800139004", "wsy888888"]
+            - backlogin-backpwd:
+                - ["admin", "wsy888888"]
+-   test:
+        name: web登录
+        api: loginweb($user, $password)
+-   test:
+        name: 添加商品
+        skip: skip this test unconditionally
+        request:
+            data:
+                end[]: 2018/10/29 11:29:28
+                id: '1'
+                ids[]: '1'
+                int_p[]: '1'
+                name: '123123123'
+                origin_p[]: '1'
+                pl_eid[]: ''
+                pl_id[]: '1'
+                start[]: 2018/10/29 09:29:28
+            headers:
+                Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+                X-Requested-With: XMLHttpRequest
+            method: POST
+            params:
+                a: save_auction_detail
+                m: e_business
+            url: /wsy_blockchain/admin/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - headers.Content-Type
+            - text/html; charset=utf-8;
+-   test:
+        name: 获取竞拍商品信息
+        request:
+            json:
+                last_id: 0
+                pro_name: ''
+            method: POST
+            params:
+                a: getAuctionList
+                m: mshop
+            url: /wsy_blockchain/web/index.php
+        extract:
+            - strprice: content.data.0.start_price
+            - nowprice: content.data.0.now_price
+            - list_id: content.data.0.list_id
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 请求成功
+-   test:
+        name: 获取竞拍商品信息2
+        skip: skip this test unconditionally
+        request:
+            json:
+                list_id: '2'
+            method: POST
+            params:
+                a: getAuctionProDetail
+                m: mshop
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 请求成功
+-   test:
+        name: 验证支付密码
+        request:
+            json:
+                pay_pass: '888888'
+            method: POST
+            params:
+                a: checkPayPass
+                m: personal
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 验证成功
+-   test:
+        name: 下单
+        request:
+            json:
+                auction_price: ${sum_two($strprice, $nowprice)}
+                product_list_id: '$list_id'
+                rec_addr: 隐山路13800134897号
+                rec_area: 南城街道
+                rec_city: 东莞市
+                rec_country: 中国
+                rec_name: 测试900
+                rec_phone: '13800134897'
+                rec_province: 广东省
+            method: POST
+            params:
+                a: userParticipateAuction
+                m: mshop
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - headers.Content-Type
+            - text/html; charset=utf-8;

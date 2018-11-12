@@ -1,0 +1,135 @@
+-   config:
+        name: 添加并使用矿机  --$user
+        request:
+            base_url: '$base_url'
+            headers:
+                User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+                    (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36 OPR/56.0.3051.52
+        variables: []
+        parameters:
+            - user-password:
+                - ["13800139002", "wsy888888"]
+                - ["13800139003", "wsy888888"]
+                - ["13800139004", "wsy888888"]
+            - backlogin-backpwd:
+                - ["admin", "wsy888888"]
+-   test:
+        name: 前端登录
+        api: loginweb($user, $password)
+-   test:
+        name: 后台登录
+        api: loginback($backlogin, $backpwd)
+-   test:
+        name: 创建矿机
+        request:
+            data:
+                continue: ''
+                day_max: '10'
+                del_logo: 
+                effective_time: '2'
+                group_id: ''
+                name: 接口测试${random_str(4)}
+                num: '1'
+                remark: '123'
+            headers:
+                Content-Type: application/x-www-form-urlencoded; charset=UTF-8
+                X-Requested-With: XMLHttpRequest
+            method: POST
+            params:
+                a: add_mining
+                m: mining_mana
+            url: /wsy_blockchain/admin/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - success
+-   test:
+        name: 查询矿机
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            method: POST
+            params:
+                a: ajax_get_user_miner
+                m: mining_mana
+                name:
+                batch_num:
+                nickname:
+                status: 1
+                group_id:
+                start:
+                end:
+            url: /wsy_blockchain/admin/index.php
+        extract:
+            - serial_num: content.data.0.serial_num
+            - miner_num: content.data.0.miner_num
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - headers.Content-Type
+            - text/html; charset=utf-8;
+-   test:
+        name: 用户添加矿机
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                serial_num: $serial_num
+                miner_num: $miner_num
+            method: POST
+            params:
+                a: userAddMiner
+                m: digMine
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 添加成功
+-   test:
+        name: 用户使用矿机
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                serial_num: $serial_num
+            method: POST
+            params:
+                a: userUseMiner
+                m: digMine
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 使用成功
+-   test:
+        name: 用户挖矿
+        time: 5
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                id: '${count_num(0)}'
+            method: POST
+            params:
+                a: recMinerals
+                m: newDigMine
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 领取成功
+
