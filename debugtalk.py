@@ -46,12 +46,22 @@ def extract_change_rate(content_data):
 	for x in range(len(data_1)):
 		s = data_1['data'][x]['change_rate']
 		l.append(s)
-	i = l.index(min(l))
+	i = l.index(max(l))
 	return data_1['data'][i]['id']
 
 # 自动递增
 def count_num(x):
 	return x + 1
+
+# 递增
+def createCounter():
+    f = [0]
+    def increase():
+        f[0] = f[0] + 1
+        return f[0]
+    return increase
+ 
+range_num = createCounter()
 
 # 抽取权益卡密码
 def card_pass(content_data):

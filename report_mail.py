@@ -10,17 +10,17 @@ from email.mime.multipart import MIMEMultipart
 def send_mail_html(file):
     '''发送html内容邮件'''
     # 发送邮箱
-    sender = 'wsyceshi002@126.com'
+    sender = 'autotest@mail.weisanyun.com'
     # 接收邮箱
-    receiver = 'chenhuike@mail.weisanyun.com'
+    receiver = 'chenhuike@mail.weisanyun.com,lirunkang@mail.weisanyun.com,huangxiangbao@mail.weisanyun.com'
     # 发送邮件主题
     t = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     subject = '自动化测试结果_' + t
     # 发送邮箱服务器
-    smtpserver = 'smtp.126.com'
+    smtpserver = 'mail.weisanyun.com'
     # 发送邮箱用户/密码
-    username = 'wsyceshi002@126.com'
-    password = 'KINGCHEN123'
+    username = 'autotest@mail.weisanyun.com'
+    password = 'RZ38pmY67X'
 
     # 读取html文件内容
     f = open(file, 'rb')
@@ -41,8 +41,12 @@ def send_mail_html(file):
 
     # 登录并发送邮件
     try:
-        smtp = smtplib.SMTP()
-        smtp.connect(smtpserver)
+        smtp = smtplib.SMTP(smtpserver, 587)
+        smtp.ehlo()  # 向Gamil发送SMTP 'ehlo' 命令
+        smtp.starttls()
+        # smtp.helo(smtpserver)
+        # smtp.ehlo(smtpserver)
+        # smtp.connect(smtpserver)
         smtp.login(username, password)
         smtp.sendmail(sender, receiver, msg.as_string())
     except:

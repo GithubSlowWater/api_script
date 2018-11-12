@@ -1,0 +1,34 @@
+-   config:
+        name: 用户挖矿  --$user
+        request:
+            base_url: '$base_url'
+            headers:
+                User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
+                    (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36 OPR/56.0.3051.52
+        variables: []
+        parameters:
+            - user-password:
+                - ["13800139002", "wsy888888"]
+-   test:
+        name: 前端登录
+        api: loginweb($user, $password)
+-   test:
+        name: 用户挖矿
+        times: 5
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                id: '${range_num()}'
+            method: POST
+            params:
+                a: recMinerals
+                m: newDigMine
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 领取成功

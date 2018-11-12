@@ -1,0 +1,131 @@
+-   config:
+        name: APP注册用户
+        request:
+            base_url: '$base_url'
+            headers:
+                User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X)
+                    AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372
+                    Safari/604.1
+        variables: 
+            user: 13800${random_int(100000,999999)}
+-   test:
+        name: 获取注册验证码
+        api: sendCheckCode($user, 1)
+-   test:
+        name: 注册成功
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                GeTuiCID: null
+                account: '$user'
+                code: '777777'
+                lang_id: '1'
+                mobile_area_code: '86'
+                nickname: 测试$user
+                password: wsy888888
+                type: '1'
+            method: POST
+            params:
+                a: register
+                m: user
+            url: /wsy_blockchain/web/index.php
+        extract:
+            - private_key: content.data.private_key
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 注册成功
+-   test:
+        name: 备份私钥
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                account: '$user'
+                code: '1'
+                help_word: aa888888
+                private_key: $private_key
+            method: POST
+            params:
+                a: backupPrivateKey
+                m: personal
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 备份私钥成功
+-   test:
+        name: 设置收货地址
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                is_select: 1
+                rec_addr: '随机地址${random_str(4)}'
+                rec_area: 延庆县
+                rec_city: 市辖区
+                rec_country: 中国
+                rec_name: 测试6006
+                rec_phone: '$user'
+                rec_province: 北京市
+            method: POST
+            params:
+                a: editRecAddr
+                m: personal
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 保存成功
+-   test:
+        name: 获取支付密码的验证码
+        api: sendCheckCode($user, 4)
+-   test:
+        name: 设置支付密码
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                code: '777777'
+                mobile: '$user'
+                pay_password: '888888'
+            method: POST
+            params:
+                a: updatePayPass
+                m: personal
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 保存成功
+-   test:
+        name: 用户签到
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json: {}
+            method: POST
+            params:
+                a: userSign
+                m: personal
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 成功签到

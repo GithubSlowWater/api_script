@@ -1,5 +1,5 @@
 -   config:
-        name: 创建并使用投资券
+        name: 创建并使用投资券   --$user
         request:
             base_url: '$base_url'
             headers:
@@ -8,11 +8,7 @@
         variables: []
         parameters:
             - user-password:
-                - ["13800139002", "wsy888888"]
-                - ["13800139003", "wsy888888"]
-                - ["13800139004", "wsy888888"]
-            - backlogin-backpwd:
-                - ["admin", "wsy888888"]
+                - ["13800139001", "wsy888888"]
 -   test:
         name: 前端登录
         api: loginweb($user, $password)
@@ -23,7 +19,7 @@
         name: 创建投资券
         request:
             data:
-                amount: '${random_float(1000,9000,4)}'
+                amount: '${random_float(100,300,4)}'
                 end: '2019-01-01 14:43:50'
                 group_id: '-1'
                 name: 接口测试${random_str(4)}
@@ -92,3 +88,25 @@
         -   eq:
             - content.errmsg
             - 使用积分券成功
+-   test:
+        name: 用户转到托管钱包
+        request:
+            headers:
+                Content-Type: application/json;charset=UTF-8
+            json:
+                money: ${random_float(100,200,4)}
+                pay_way: 1
+                private_key:
+                help_word: 'aa888888'
+            method: POST
+            params:
+                a: useInvestment
+                m: personal
+            url: /wsy_blockchain/web/index.php
+        validate:
+        -   eq:
+            - status_code
+            - 200
+        -   eq:
+            - content.errmsg
+            - 转入申请已提交

@@ -7,7 +7,7 @@ pipeline {
 		stage('清空文件') {
 			steps {
 				echo "start clean report"
-				dir('/opt/apitest/BC/reports/') {
+				dir('/opt/api/jenkins/jobs/blockchain/api_script/reports/') {
 					deleteDir()
 				}
 
@@ -17,8 +17,8 @@ pipeline {
 		stage('运行自动化脚本'){
 			steps {
 				echo "start run api_test"
-				dir('/opt/apitest/BC') {
-					sh '/usr/local/bin/hrun testsuites'
+				dir('/opt/api/jenkins/jobs/blockchain/api_script/') {
+					sh '/usr/local/bin/hrun testcase'
 				}
 			}
 		}
@@ -26,8 +26,8 @@ pipeline {
 		stage('发送测试报告'){
 			steps {
 				echo "start send emaill"
-				dir('/opt/apitest/BC/') {
-					sh 'python c5.py'
+				dir('/opt/api/jenkins/jobs/blockchain/api_script/') {
+					sh 'python report_mail.py'
 				}
 			}
 		}

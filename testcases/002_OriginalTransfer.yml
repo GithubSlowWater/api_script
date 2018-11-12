@@ -9,8 +9,6 @@
         parameters:
             - user-password-account:
                 - ["13800139001", "wsy888888", "13800139002"]
-            - backlogin-backpwd:
-                - ["admin", "wsy888888"]
 -   test:
         name: 前端登录
         api: loginweb($user, $password)
